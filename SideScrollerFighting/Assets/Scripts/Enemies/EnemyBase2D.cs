@@ -1,106 +1,77 @@
-// Assets/Scripts/Enemies/EnemyBase2D.cs
+using System;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
-public class EnemyBase2D : MonoBehaviour, IDamageable
+[RequireComponent(typeof(Rigidbody2D), typeof(Collider2D), typeof(Animator))]
+public class EnemyBase2D : MonoBehaviour
 {
-    [Header("Core")]
-    public int maxHP = 30;
-    public float moveSpeed = 2.5f;
-    public float gravityScale = 3f;
+    [SerializeField]private float _health;
+    [SerializeField]private float _speed;
+    [SerializeField]private float _force;
+    private string Speed = "Speed";
+    private string Attack = "Attack";
+    private string IsDead = "IsDead";
+    private string Hit = "Hit";
+    private Vector3 _direction;
+    
+    private Rigidbody2D _rigidbody2D;
+    private Animator _animator;
+    private GameObject _player;
+    private EnemyBase2D _enemyBase2D;
 
-    [Header("Layers & Masks")]
-    public LayerMask groundMask;   // Ground
-    public LayerMask playerMask;   // Player (важно назначить!)
-
-    [Header("Ground Check")]
-    public Transform groundCheck;
-    public Vector2 groundBox = new(0.6f, 0.1f);
-
-    [Header("Animator (optional)")]
-    public Animator animator;
-    public string pSpeedX = "SpeedX";
-    public string pGround = "IsGrounded";
-    public string tHurt = "Hurt";
-    public string tDie = "Die";
-
-    protected Rigidbody2D rb;
-    protected Transform player;
-    protected int hp;
-    protected bool grounded;
-    protected bool facingRight = true;
-    protected bool alive = true;
-
-    public bool IsAlive => alive;
-
-    protected virtual void Awake()
+    private void Awake()
     {
-        rb = GetComponent<Rigidbody2D>();
-        rb.gravityScale = gravityScale;
-        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
-        rb.freezeRotation = true;
+        _rigidbody2D = GetComponent<Rigidbody2D>();
+        _animator = GetComponent<Animator>();
+        _player = GameObject.FindGameObjectWithTag("Player");
+        _enemyBase2D = GetComponentInChildren<EnemyBase2D>();
 
-        hp = maxHP;
-
-        // Поиск игрока по тегу
-        var tagged = GameObject.FindGameObjectWithTag("Player");
-        if (tagged) player = tagged.transform;
-
-        // Бэкап: если тега нет — ищем по слою в большом радиусе
-        if (!player && playerMask.value != 0)
+        if (!_player)
         {
-            var c = Physics2D.OverlapCircle(transform.position, 100f, playerMask);
-            if (c) player = c.transform;
+            throw new Exception("Player not found");
         }
     }
 
-    protected virtual void Update()
+    private void OnEnable()
     {
-        if (animator)
-        {
-            animator.SetFloat(pSpeedX, Mathf.Abs(rb.velocity.x));
-            animator.SetBool(pGround, grounded);
-        }
+        _enemyBase2D.
     }
 
-    protected virtual void FixedUpdate()
+    private void FixedUpdate()
     {
-        grounded = groundCheck &&
-                   Physics2D.OverlapBox(groundCheck.position, groundBox, 0f, groundMask);
+        WalkToPlayer();
     }
 
-    protected void FaceTowards(Vector2 targetPos)
+    private void AttackPlayer()
     {
-        bool right = targetPos.x >= transform.position.x;
-        if (right != facingRight)
-        {
-            facingRight = right;
-            var s = transform.localScale;
-            s.x = Mathf.Abs(s.x) * (facingRight ? 1 : -1);
-            transform.localScale = s;
-        }
+        
     }
 
-    public virtual void TakeDamage(int amount, Vector2 hitPoint, Vector2 hitNormal)
+    private void WalkToPlayer()
     {
-        if (!alive) return;
-        hp -= amount;
-        if (animator) animator.SetTrigger(tHurt);
+        _direction = Vector3.zero;
+        float delta = _player.transform.position.x - transform.position.x;
 
-        if (hp <= 0)
+        if (Mathf.Abs(delta) > 0.1f)
         {
-            alive = false;
-            if (animator) animator.SetTrigger(tDie);
-            Destroy(gameObject, 0.1f);
+            if (delta < 0)
+            {
+                _direction = Vector3.left;
+                Vector3 scale = transform.localScale;
+                scale.x = -Mathf.Abs(scale.x) * 1f;
+                transform.localScale = scale;
+            }
+            else if (delta > 0)
+            {
+                _direction = Vector3.right;
+                Vector3 scale = transform.localScale;
+                scale.x = Mathf.Abs(scale.x) * 1f;
+                transform.localScale = scale;
+            }
         }
-    }
 
-    protected virtual void OnDrawGizmosSelected()
-    {
-        if (groundCheck)
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireCube(groundCheck.position, groundBox);
-        }
+        _direction *= _speed;
+        _direction.y = _rigidbody2D.velocity.y;
+        _rigidbody2D.velocity = _direction;
+        _animator.SetFloat(Speed, Mathf.Abs(_direction.x));
     }
 }
