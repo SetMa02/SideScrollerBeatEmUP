@@ -1,10 +1,10 @@
-// PlayerCombat2D.cs Ч расширенна€ верси€: лочим движение, спец-атака, два хитбокса
+// Assets/Scripts/Player/PlayerCombat2D.cs
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerMotor2D))]
 public class PlayerCombat2D : MonoBehaviour
 {
-    [Header("Common")]
+    [Header("Refs")]
     public Animator animator;
     PlayerMotor2D _motor;
 
@@ -12,13 +12,13 @@ public class PlayerCombat2D : MonoBehaviour
     public KeyCode attackKey = KeyCode.Mouse0;
     public float attackCooldown = 0.35f;
     public AttackHitbox hitbox;                 // обычный хитбокс
-    public float hitboxEnableTime = 0.08f;
+    public float hitboxEnableTime = 0.08f;      // если без анима-ивентов
     public float hitboxDisableTime = 0.18f;
 
     [Header("Special Attack")]
     public KeyCode specialKey = KeyCode.Mouse1;
     public float specialCooldown = 0.8f;
-    public AttackHitbox specialHitbox;          // отдельный хитбокс (больше урон/радиус)
+    public AttackHitbox specialHitbox;          // спец-хитбокс
     public float spHitOnTime = 0.14f;
     public float spHitOffTime = 0.28f;
 
@@ -33,6 +33,13 @@ public class PlayerCombat2D : MonoBehaviour
     void Awake()
     {
         _motor = GetComponent<PlayerMotor2D>();
+    }
+
+    void Start()
+    {
+        // по умолчанию ¬—≈ хитбоксы выключены
+        if (hitbox) hitbox.SetActive(false);
+        if (specialHitbox) specialHitbox.SetActive(false);
     }
 
     void Update()
@@ -57,10 +64,9 @@ public class PlayerCombat2D : MonoBehaviour
     {
         if (animator) { animator.ResetTrigger(trigAttack); animator.SetTrigger(trigAttack); }
         _isAttacking = true;
-
-        // Ћочим движение на всю атаку
         _motor.SetMovementLock(true);
 
+        // если без анима-событий Ч включим таймерами
         if (hitbox)
         {
             CancelInvoke(nameof(HB_On));
@@ -68,8 +74,8 @@ public class PlayerCombat2D : MonoBehaviour
             Invoke(nameof(HB_On), hitboxEnableTime);
             Invoke(nameof(HB_Off), hitboxDisableTime);
         }
-        // ‘эйлсейф: авторазлочка в конце  ƒ (если забыли эвенты)
-        Invoke(nameof(EndAttack), attackCooldown * 0.95f);
+
+        Invoke(nameof(EndAttack), attackCooldown * 0.95f); // страховка
     }
 
     void StartSpecial()
@@ -85,6 +91,7 @@ public class PlayerCombat2D : MonoBehaviour
             Invoke(nameof(SP_On), spHitOnTime);
             Invoke(nameof(SP_Off), spHitOffTime);
         }
+
         Invoke(nameof(EndAttack), specialCooldown * 0.95f);
     }
 
@@ -102,7 +109,7 @@ public class PlayerCombat2D : MonoBehaviour
         if (specialHitbox) specialHitbox.SetActive(false);
     }
 
-    // Animation Events (если используешь эвенты в клипах)
+    // --- Animation Events (если пользуешьс€ ими в клипах) ---
     public void AE_AttackStart() { _isAttacking = true; _motor.SetMovementLock(true); }
     public void AE_HitboxOn() { HB_On(); }
     public void AE_HitboxOff() { HB_Off(); }
