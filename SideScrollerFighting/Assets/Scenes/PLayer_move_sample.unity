@@ -403,7 +403,7 @@ GameObject:
   - component: {fileID: 360773652}
   - component: {fileID: 360773651}
   - component: {fileID: 360773650}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: AttackCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -783,16 +783,24 @@ MonoBehaviour:
   animator: {fileID: 802738127}
   attackKey: 323
   attackCooldown: 0.5
-  hitbox: {fileID: 573179859}
   hitboxEnableTime: 0.08
   hitboxDisableTime: 0.18
   specialKey: 324
   specialCooldown: 1
-  specialHitbox: {fileID: 573179859}
   spHitOnTime: 0.53
   spHitOffTime: 0.28
   trigAttack: Attack
   trigSpecial: Special
+  enemyMask:
+    serializedVersion: 2
+    m_Bits: 128
+  hitBoxSize: {x: 1.45, y: 2.68}
+  hitBoxOffset: {x: 0.4, y: -0.41}
+  attackDamage: 15
+  specialDamage: 30
+  hitOncePerSwing: 1
+  perTargetCooldown: 0.2
+  drawGizmos: 1
   _health: 100
 --- !u!114 &802738130
 MonoBehaviour:
@@ -971,7 +979,7 @@ GameObject:
   - component: {fileID: 1343733125}
   - component: {fileID: 1343733124}
   - component: {fileID: 1343733123}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: PlayerDetector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1531,7 +1539,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e2c0082365fce94c849ba5d5f26b095, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _health: 100
+  _maxHealth: 50
+  _health: 50
   _speed: 1
   _force: 5
 --- !u!61 &1658250522
@@ -1850,7 +1859,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1902276922}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Ground_check_enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
