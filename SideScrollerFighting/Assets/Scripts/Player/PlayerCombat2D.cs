@@ -11,20 +11,22 @@ public class PlayerCombat2D : MonoBehaviour
     [Header("Normal Attack")]
     public KeyCode attackKey = KeyCode.Mouse0;
     public float attackCooldown = 0.35f;
-    public AttackHitbox hitbox;                 // обычный хитбокс
-    public float hitboxEnableTime = 0.08f;      // если без анима-ивентов
+    public AttackHitbox hitbox;                 // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    public float hitboxEnableTime = 0.08f;      // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     public float hitboxDisableTime = 0.18f;
 
     [Header("Special Attack")]
     public KeyCode specialKey = KeyCode.Mouse1;
     public float specialCooldown = 0.8f;
-    public AttackHitbox specialHitbox;          // спец-хитбокс
+    public AttackHitbox specialHitbox;          // пїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     public float spHitOnTime = 0.14f;
     public float spHitOffTime = 0.28f;
 
     [Header("Animator Triggers")]
     public string trigAttack = "Attack";
     public string trigSpecial = "Special";
+    
+    [SerializeField]private float _health = 100;
 
     float _atkCd;
     float _spCd;
@@ -37,7 +39,7 @@ public class PlayerCombat2D : MonoBehaviour
 
     void Start()
     {
-        // по умолчанию ВСЕ хитбоксы выключены
+        // пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (hitbox) hitbox.SetActive(false);
         if (specialHitbox) specialHitbox.SetActive(false);
     }
@@ -60,22 +62,29 @@ public class PlayerCombat2D : MonoBehaviour
         }
     }
 
+    public void GetHit(float damage)
+    {
+        _health -= damage;
+        Debug.Log("Player Health: " + _health);
+    }
+    
     void StartAttack()
     {
         if (animator) { animator.ResetTrigger(trigAttack); animator.SetTrigger(trigAttack); }
         _isAttacking = true;
         _motor.SetMovementLock(true);
 
-        // если без анима-событий — включим таймерами
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (hitbox)
         {
             CancelInvoke(nameof(HB_On));
             CancelInvoke(nameof(HB_Off));
+            
             Invoke(nameof(HB_On), hitboxEnableTime);
             Invoke(nameof(HB_Off), hitboxDisableTime);
         }
 
-        Invoke(nameof(EndAttack), attackCooldown * 0.95f); // страховка
+        Invoke(nameof(EndAttack), attackCooldown * 0.95f); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     }
 
     void StartSpecial()
@@ -109,7 +118,7 @@ public class PlayerCombat2D : MonoBehaviour
         if (specialHitbox) specialHitbox.SetActive(false);
     }
 
-    // --- Animation Events (если пользуешься ими в клипах) ---
+    // --- Animation Events (пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ) ---
     public void AE_AttackStart() { _isAttacking = true; _motor.SetMovementLock(true); }
     public void AE_HitboxOn() { HB_On(); }
     public void AE_HitboxOff() { HB_Off(); }

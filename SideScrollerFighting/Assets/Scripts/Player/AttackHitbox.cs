@@ -1,11 +1,13 @@
 // Assets/Scripts/Player/AttackHitbox.cs
+
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class AttackHitbox : MonoBehaviour
 {
     [Header("Targeting")]
-    public LayerMask targetMask;                 // слой Enemy
+    public LayerMask targetMask;                 // пїЅпїЅпїЅпїЅ Enemy
     public int damage = 20;
 
     [Header("Shape")]
@@ -13,23 +15,23 @@ public class AttackHitbox : MonoBehaviour
     public Vector2 boxOffset = new(0.8f, 0.2f);
 
     [Header("Anti-spam")]
-    [Tooltip("Наносить урон каждому объекту максимум один раз за одно включение хитбокса")]
+    [Tooltip("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ")]
     public bool hitOncePerSwing = true;
-    [Tooltip("Если false, используем КД на цель, чтобы не тикало каждый кадр")]
+    [Tooltip("пїЅпїЅпїЅпїЅ false, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ")]
     public float perTargetCooldown = 0.2f;
 
     bool _active;
     Transform _owner;
 
-    // Кого уже били в этом «взмахе»
+    // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     readonly HashSet<IDamageable> _hitThisSwing = new();
-    // Время, когда можно снова бить цель (если hitOncePerSwing = false)
+    // пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅ hitOncePerSwing = false)
     readonly Dictionary<IDamageable, float> _nextHitTime = new();
 
     void Awake()
     {
         _owner = transform.root;
-        _active = false; // по умолчанию выключен
+        _active = false; // пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     }
 
     void Update()
@@ -44,19 +46,19 @@ public class AttackHitbox : MonoBehaviour
         {
             if (!TryGetDamageable(c, out var dmg) || !dmg.IsAlive) continue;
 
-            // не бьем владельца
+            // пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             if (c.attachedRigidbody && c.attachedRigidbody.transform == _owner) continue;
 
-            // анти-спам: один раз за свинг
+            // пїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
             if (hitOncePerSwing)
             {
-                if (_hitThisSwing.Contains(dmg)) continue;   // уже били в этот свинг
+                if (_hitThisSwing.Contains(dmg)) continue;   // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
                 dmg.TakeDamage(damage, c.transform.position, Vector2.up);
                 _hitThisSwing.Add(dmg);
             }
             else
             {
-                // пер-цельный КД
+                // пїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ
                 float now = Time.time;
                 if (_nextHitTime.TryGetValue(dmg, out float t) && now < t) continue;
                 dmg.TakeDamage(damage, c.transform.position, Vector2.up);
@@ -72,7 +74,7 @@ public class AttackHitbox : MonoBehaviour
 
         if (_active)
         {
-            // новый «взмах» — очистим список уже поражённых
+            // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             _hitThisSwing.Clear();
         }
     }
@@ -94,5 +96,16 @@ public class AttackHitbox : MonoBehaviour
         float dir = _owner ? Mathf.Sign(_owner.localScale.x) : 1f;
         Vector3 center = transform.position + new Vector3(boxOffset.x * dir, boxOffset.y, 0);
         Gizmos.DrawWireCube(center, (Vector3)boxSize);
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            if (other.TryGetComponent(out EnemyBase2D enemy))
+            {
+                //enemy.TakeDamage(damage, other.transform.position, other.transform.up);
+            }
+        }
     }
 }
